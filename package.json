@@ -1,0 +1,26 @@
+{
+  "name": "@dsh-external/dsh-subagent-rules",
+  "version": "0.1.0",
+  "description": "子代理模型与思考强度规定：自动注入分发规则，subagent_flash 锁定 flash 模型，思考强度默认 max 且可按会话自定义。零依赖宿主平面插件。",
+  "private": false,
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "scripts/build.sh",
+    "README.md"
+  ],
+  "license": "BSD-3-Clause",
+  "peerDependencies": {
+    "cordis": ">=4.0.0-rc <5"
+  },
+  "scripts": {
+    "build": "bash scripts/build.sh"
+  }
+}
