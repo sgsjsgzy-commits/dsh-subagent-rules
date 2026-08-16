@@ -46,11 +46,17 @@ dev_inject_plugin {"dir": "F:/dsh-subagent-rules"}
 - 想让子代理用非默认强度 → 任务提示里写"先调用 `effort_set <level>` 再开始工作"
 - 会话自己调强度 → `effort_set medium` / `effort_set auto`
 
-## 注意
+## 注意与适配性
 
+- **依赖**：`@deepseek-ai/dsh-subagent`（`subagents` 服务）——标准 Harness 组合自带；缺它插件会启动失败（响亮失败，按设计）
 - `flashProvider`/`flashModel` 必须是部署环境**真实注册**的模型 id（检查 `~/.dsh/settings.yaml` 的 llm 目录；不存在的 id 会导致子代理拉起失败返回 null）
 - 思考强度兜底只补"缺省"情况：显式设置的 effort 永不覆盖
-- 与 anchored-standard preset 的 `subagentCatalog: flash` / 内置 `max-effort` 行可共存（最近作用域优先）；其他部署只需本插件
+- 与 anchored-standard preset 的 `subagentCatalog: flash` / 内置 `max-effort` / `tool-subagent-flash` 行可共存：**最近作用域优先**（preset 层同名工具遮蔽插件层），插件注册遇同名自动跳过；其他部署只需本插件
+- `injectRules: true` 时规则段会出现在**所有**会话的系统提示里（含 anchored 首请求——若在意 strict Minimal 锚定条件可设 `false`，规则仍通过工具描述生效）
+
+## 标签（GitHub）
+
+官方生态指引（deepseek-harness CONTRIBUTING.md）：插件仓库必须关联 **`dsh-plugin`** topic。生态常用组合：`dsh-plugin` + `deepseek-harness` + `dsh`。
 
 ## 许可
 
