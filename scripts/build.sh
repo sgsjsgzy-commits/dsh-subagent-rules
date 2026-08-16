@@ -11,5 +11,11 @@ if [ ! -f lib/index.js ]; then
   exit 1
 fi
 
+if [ ! -f lib/client.js ]; then
+  echo "build: lib/client.js missing" >&2
+  exit 1
+fi
+
 node --check lib/index.js
+node --check lib/client.js
 echo "=== Build complete (lib verified, ${PWD}) ==="
