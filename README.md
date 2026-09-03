@@ -38,29 +38,46 @@
 
 ## 安装
 
-手写 ESM 插件（无需 tsc / npm install）：
+手写 ESM 插件（无需 tsc / npm install 本插件）。常规安装流程（在本机 `dsh` profile 内，以 `web` 为例）：
 
-```sh
-# 通过 dsh-super-injector 构建（校验 lib/）并运行时注入
-dev_build_plugin {"dir": "F:/dsh-subagent-rules"}
-dev_inject_plugin {"dir": "F:/dsh-subagent-rules"}
-```
+1. 打包安装包
+   ```sh
+   cd dsh-subagent-rules
+   bash scripts/build.sh                      # 校验 lib/index.js 与 lib/client.js
+   npm pack --pack-destination /tmp           # 产物 /tmp/dsh-external-dsh-subagent-rules-<ver>.tgz
+   mkdir -p ~/.dsh/vendor
+   cp /tmp/dsh-external-dsh-subagent-rules-<ver>.tgz ~/.dsh/vendor/   # 放到持久目录，勿留 /tmp
+   ```
+2. 安装到 profile
+   ```sh
+   cd ~/.dsh/profiles/<profile>               # 例如 web
+   dsh plugin add --profile <profile> ~/.dsh/vendor/dsh-external-dsh-subagent-rules-<ver>.tgz
+   # 或把 package.json 依赖指向 file:../../vendor/dsh-external-dsh-subagent-rules-<ver>.tgz 后执行 pnpm install
+   ```
+3. 在 profile 的 `cordis.patch.yml` 注册插件与配置（见下节），然后**重启 DSH** 生效
+4. 浏览器**硬刷新**（`Cmd+Shift+R`）加载新版 client
 
-重启 DSH 后对所有会话生效（注入器也可运行时注入，免重启）；发布后用 `dsh plugin add <tgz>` 常规安装亦可。
+> 若部署内含 dsh-super-injector，也可用其 `dev_build_plugin` / `dev_inject_plugin` 运行时注入（免重启），效果相同。`dsh plugin add` 若提示 "no dsh.bundle — installed as a plain dependency" 为预期警告，本插件靠 patch 注册，忽略即可。
 
 ## 配置（profile / patch）
 
+在 `~/.dsh/profiles/<profile>/cordis.patch.yml` 追加：
+
 ```yaml
-- id: subagent-rules
-  name: '@dsh-external/dsh-subagent-rules'
-  config:
-    provider: spawn            # 子代理 provider：spawn / fork
-    flashProvider: opencode-go # flash 模型所在 provider（须在部署目录中）
-    flashModel: deepseek-v4-flash
-    defaultEffort: max         # 默认思考强度
-    injectRules: false         # 默认关闭自动注入；true 恢复旧版每次注入
-    toolName: subagent_flash   # flash 子代理工具名
+- insert:
+    - id: subagent-rules
+      name: '@dsh-external/dsh-subagent-rules'
+      config:
+        provider: spawn            # 子代理 provider：spawn / fork
+        flashProvider: <provider>  # 改成你环境真实注册的 provider id（见 ~/.dsh/settings.yaml）
+        flashModel: <model-id>     # 改成真实 model id；指向不存在的模型会导致子代理拉起失败
+        defaultEffort: max         # 请求缺省思考强度时的兜底
+        injectRules: false         # 默认关闭自动注入；true 恢复旧版每次注入
+        toolName: subagent_flash   # flash 子代理工具名
 ```
+
+- `flashProvider` / `flashModel` 必须在目标部署**真实注册**（检查 `~/.dsh/settings.yaml` 的 llm 目录）；默认值 `opencode-go` / `deepseek-v4-flash` 只对官方远程部署有效
+- v0.2.2 的会话默认派发不开配置项：由输入框旁选择器按会话设置，持久化到 `$DSH_HOME/storages/subagent-rules-defaults.json`
 
 ## 用法
 
