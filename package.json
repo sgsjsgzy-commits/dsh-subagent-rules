@@ -1,6 +1,6 @@
 {
   "name": "@dsh-external/dsh-subagent-rules",
-  "version": "0.2.0",
+  "version": "0.2.6",
   "description": "配合 pro/flash 增强插件使用的子代理模型与思考强度规定：不再自动注入规则，改为输入框模型选择旁的子代理选择器（可选全部提供商模型/思考强度，生成提示词进对话框）。subagent_flash 锁定 flash 模型，subagent_model 支持任意模型，思考强度默认 max 且可按会话自定义。",
   "private": false,
   "type": "module",
